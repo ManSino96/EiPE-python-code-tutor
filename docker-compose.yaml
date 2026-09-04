@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  moodle:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      # Previous DB configs ...
+      MOODLE_DB_TYPE: pgsql
+      MOODLE_DB_HOST: aws-1-eu-west-1.pooler.supabase.com
+
+      APACHE_DOCUMENT_ROOT: /var/www/html/public
+      APACHE_RUN_USER: www-data
+      APACHE_RUN_GROUP: www-data
+      APACHE_PID_FILE: /var/run/apache2/apache2.pid
+      APACHE_RUN_DIR: /var/run/apache2
+      APACHE_LOCK_DIR: /var/lock/apache2
+      APACHE_LOG_DIR: /var/log/apache2
+      # ...
+      MOODLE_ADMIN_USER: admin
+      MOODLE_ADMIN_PASS: AdminPassword#123
+      MOODLE_ADMIN_EMAIL: sinomazi@gmail.com
+
+      # Tell PhpStorm which server path mapping to match
+      PHP_IDE_CONFIG: "serverName=moodle-docker"
+
+      # Xdebug 3 configuration
+      XDEBUG_MODE: "debug,develop"
+      XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003 start_with_request=yes"
+    extra_hosts:
+      # Required on Linux so the container can resolve host.docker.internal
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./:/var/www/html
+      - moodledata:/var/www/moodledata    # Reference to the volume
+      - ./prod-ca-2021.crt:/etc/ssl/certs/prod-ca-2021.crt:ro
+
+# MUST BE AT COLUMN 0 (NO SPACES IN FRONT OF "volumes:")
+volumes:
+  moodledata:
+
+
+
+
